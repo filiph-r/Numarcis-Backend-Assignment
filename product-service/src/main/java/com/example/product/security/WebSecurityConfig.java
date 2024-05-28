@@ -8,23 +8,24 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+public class WebSecurityConfig
+{
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+	{
 		http
+				.csrf().disable()
 				.authorizeHttpRequests((authz) -> authz
 						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.GET.name())).permitAll()
 						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.POST.name())).hasRole("ADMIN")
 						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.PUT.name())).hasRole("ADMIN")
 						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.DELETE.name())).hasRole("ADMIN")
 						.anyRequest().authenticated()
-				)
-				.csrf((csrf) -> csrf.ignoringRequestMatchers(
-						new AntPathRequestMatcher("/products/**", HttpMethod.GET.name())
-				));
+				);
 		return http.build();
 	}
 }
