@@ -11,39 +11,35 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig
-{
+public class WebSecurityConfig {
+
 	private JwtTokenProvider jwtTokenProvider;
 
 	@Autowired
-	public WebSecurityConfig(JwtTokenProvider jwtTokenProvider)
-	{
+	public WebSecurityConfig(JwtTokenProvider jwtTokenProvider) {
 		this.jwtTokenProvider = jwtTokenProvider;
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
-	{
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-				.csrf().disable()
-				.authorizeHttpRequests((authz) -> authz
-						.requestMatchers(new AntPathRequestMatcher("/users/register"), new AntPathRequestMatcher("/users/login"))
-						.permitAll()
+				.csrf(csrf -> csrf.disable())  // Disable CSRF protection
+				.authorizeHttpRequests(authz -> authz
+						.requestMatchers(
+								new AntPathRequestMatcher("/users/register"),
+								new AntPathRequestMatcher("/users/login")
+						).permitAll()
 						.anyRequest().authenticated()
-						.and()
-						.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-				);
+				)
+				.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
 		return http.build();
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder()
-	{
+	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 }
-
-

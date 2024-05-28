@@ -1,53 +1,68 @@
 package com.example.user.security;
 
-import io.jsonwebtoken.*;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 
-
 @Component
-public class JwtTokenProvider
-{
-	private final String secretKey = "secret";
+public class JwtTokenProvider {
 
-	public String createToken(String username, List<String> roles)
-	{
-		Claims claims = Jwts.claims().setSubject(username);
-		claims.put("roles", roles);
+	@Value("${jwt.secret}")
+	private String secretKey;
 
-		Date now = new Date();
-		Date validity = new Date(now.getTime() + 3600000); // 1h
+	@Value("${jwt.expiration}")
+	private long expirationTime; // in milliseconds
 
-		return Jwts.builder()
-				.setClaims(claims)
-				.setIssuedAt(now)
-				.setExpiration(validity)
-				.signWith(SignatureAlgorithm.HS256, secretKey)
-				.compact();
+	private Algorithm algorithm;
+	private JWTVerifier verifier;
+
+	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+		this.secretKey = secretKey;
+		this.algorithm = Algorithm.HMAC256(secretKey);
+		this.verifier = JWT.require(algorithm).build();
 	}
 
-	public boolean validateToken(String token)
-	{
-		try
-		{
-			Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-			return !claims.getBody().getExpiration().before(new Date());
+	public String createToken(String username, List<String> roles) {
+		return JWT.create()
+				.withSubject(username)
+				.withIssuedAt(new Date())
+				.withExpiresAt(new Date(System.currentTimeMillis() + expirationTime))
+				.withClaim("roles", roles)
+				.sign(algorithm);
+	}
+
+	public boolean validateToken(String token) {
+		try {
+			verifier.verify(token);
+			return true;
+		} catch (JWTVerificationException e) {
+			throw new RuntimeException("Expired or invalid JWT token", e);
 		}
-		catch (JwtException | IllegalArgumentException e)
-		{
-			throw new RuntimeException("Expired or invalid JWT token");
+	}
+
+	public String getUsername(String token) {
+		try {
+			DecodedJWT jwt = verifier.verify(token);
+			return jwt.getSubject();
+		} catch (JWTVerificationException e) {
+			throw new RuntimeException("Invalid JWT token", e);
 		}
 	}
 
-	public String getUsername(String token)
-	{
-		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-	}
-
-	public List<String> getRoles(String token)
-	{
-		return (List<String>) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("roles");
+	public List<String> getRoles(String token) {
+		try {
+			DecodedJWT jwt = verifier.verify(token);
+			return jwt.getClaim("roles").asList(String.class);
+		} catch (JWTDecodeException e) {
+			throw new RuntimeException("Invalid JWT token", e);
+		}
 	}
 }
