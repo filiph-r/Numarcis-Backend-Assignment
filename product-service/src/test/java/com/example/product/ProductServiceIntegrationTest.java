@@ -2,7 +2,8 @@ package com.example.product;
 
 import com.example.product.model.Product;
 import com.example.product.security.JwtUtil;
-import com.example.product.service.ProductService;
+import com.example.product.security.SecurityConstants;
+import com.example.product.service.interfaces.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+/**
+ * Integration tests for the ProductService.
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class ProductServiceIntegrationTest
-{
+public class ProductServiceIntegrationTest {
 
 	private MockMvc mockMvc;
 
 	@Autowired
 	private WebApplicationContext context;
+
 	@Autowired
 	private JwtUtil jwtUtil;
 
@@ -52,28 +55,29 @@ public class ProductServiceIntegrationTest
 
 	private Product product;
 
-
-
+	/**
+	 * Sets up the test environment before each test.
+	 */
 	@BeforeEach
-	void setUp()
-	{
+	void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 		product = new Product();
-		product.setId(1l);
+		product.setId(1L);
 		product.setName("Test Product");
 		product.setDescription("Test Description");
 		product.setCategory("Test Category");
 	}
 
+	/**
+	 * Tests the creation of a product.
+	 */
 	@Test
-	void testCreateProduct() throws Exception
-	{
-		when(productService.save(any(Product.class))).thenAnswer(invocation -> {
-			return invocation.getArgument(0);
-		});
+	void testCreateProduct() throws Exception {
+		when(productService.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(post("/products")
 						.headers(headers)
@@ -86,9 +90,11 @@ public class ProductServiceIntegrationTest
 				.andExpect(jsonPath("$.category", is(product.getCategory())));
 	}
 
+	/**
+	 * Tests retrieving all products.
+	 */
 	@Test
-	void testGetAllProducts() throws Exception
-	{
+	void testGetAllProducts() throws Exception {
 		Product product1 = new Product();
 		product1.setId(2L);
 		product1.setName("Test Product 1");
@@ -106,7 +112,8 @@ public class ProductServiceIntegrationTest
 		when(productService.findAll()).thenReturn(products);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(get("/products")
 						.headers(headers))
@@ -121,19 +128,22 @@ public class ProductServiceIntegrationTest
 				.andExpect(jsonPath("$[1].category", is(product2.getCategory())));
 	}
 
+	/**
+	 * Tests retrieving a product by its ID.
+	 */
 	@Test
-	void testGetProductById() throws Exception
-	{
+	void testGetProductById() throws Exception {
 		Product product = new Product();
 		product.setId(4L);
 		product.setName("Test Product");
 		product.setDescription("Test Description");
 		product.setCategory("Test Category");
 
-		when(productService.findById(4l)).thenReturn(Optional.of(product));
+		when(productService.findById(4L)).thenReturn(Optional.of(product));
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(get("/products/{id}", product.getId())
 						.headers(headers))
@@ -144,9 +154,11 @@ public class ProductServiceIntegrationTest
 				.andExpect(jsonPath("$.category", is(product.getCategory())));
 	}
 
+	/**
+	 * Tests updating a product.
+	 */
 	@Test
-	void testUpdateProduct() throws Exception
-	{
+	void testUpdateProduct() throws Exception {
 		Product product = new Product();
 		product.setId(5L);
 		product.setName("Test Product");
@@ -159,11 +171,12 @@ public class ProductServiceIntegrationTest
 		updatedProduct.setDescription("Updated Test Description");
 		updatedProduct.setCategory("Updated Test Category");
 
-		when(productService.findById(5l)).thenReturn(Optional.of(product));
+		when(productService.findById(5L)).thenReturn(Optional.of(product));
 		when(productService.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(put("/products/{id}", product.getId())
 						.headers(headers)
@@ -176,26 +189,32 @@ public class ProductServiceIntegrationTest
 				.andExpect(jsonPath("$.category", is(updatedProduct.getCategory())));
 	}
 
+	/**
+	 * Tests deleting a product.
+	 */
 	@Test
-	void testDeleteProduct() throws Exception
-	{
+	void testDeleteProduct() throws Exception {
 		Mockito.doNothing().when(productService).deleteById(anyLong());
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(delete("/products/{id}", product.getId())
 						.headers(headers))
 				.andExpect(status().isNoContent());
 	}
 
+	/**
+	 * Tests searching for products.
+	 */
 	@Test
-	void testSearchProducts() throws Exception
-	{
+	void testSearchProducts() throws Exception {
 		when(productService.search(any(String.class))).thenReturn(Collections.singletonList(product));
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN")));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username",
+				Collections.singletonList(SecurityConstants.ROLE_ADMIN)));
 
 		mockMvc.perform(get("/products/search").param("query", "Test").headers(headers))
 				.andExpect(status().isOk())

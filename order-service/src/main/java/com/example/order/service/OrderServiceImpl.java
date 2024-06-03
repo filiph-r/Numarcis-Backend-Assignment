@@ -13,18 +13,30 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Optional;
 
-
+/**
+ * Service implementation for managing orders.
+ * This class handles the business logic related to orders,
+ * including creating, retrieving, and deleting orders.
+ */
 @Service
-public class OrderServiceImpl implements OrderService
-{
+public class OrderServiceImpl implements OrderService {
+
 	@Autowired
 	private OrderRepository orderRepository;
 
 	@Autowired
 	private RestTemplate restTemplate;
 
-	public Order save(Order order, String authorizationHeader)
-	{
+	/**
+	 * Saves an order. Before saving, it validates each product in the order
+	 * by calling the product service to check if the product is available.
+	 *
+	 * @param order the order to save
+	 * @param authorizationHeader the authorization header containing the JWT token
+	 * @return the saved order
+	 * @throws RuntimeException if a product in the order is not available
+	 */
+	public Order save(Order order, String authorizationHeader) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set(SecurityConstants.JWT_HEADER_STRING, authorizationHeader);
 
@@ -38,8 +50,7 @@ public class OrderServiceImpl implements OrderService
 					Product.class
 			);
 
-			if (response.getStatusCode() != HttpStatus.OK)
-			{
+			if (response.getStatusCode() != HttpStatus.OK) {
 				throw new RuntimeException("Product not available");
 			}
 		});
@@ -47,23 +58,41 @@ public class OrderServiceImpl implements OrderService
 		return orderRepository.save(order);
 	}
 
-	public List<Order> findAll()
-	{
+	/**
+	 * Retrieves all orders.
+	 *
+	 * @return a list of all orders
+	 */
+	public List<Order> findAll() {
 		return orderRepository.findAll();
 	}
 
-	public Optional<Order> findById(Long id)
-	{
+	/**
+	 * Retrieves an order by its ID.
+	 *
+	 * @param id the ID of the order
+	 * @return an Optional containing the order if found, or empty if not found
+	 */
+	public Optional<Order> findById(Long id) {
 		return orderRepository.findById(id);
 	}
 
-	public void deleteById(Long id)
-	{
+	/**
+	 * Deletes an order by its ID.
+	 *
+	 * @param id the ID of the order to delete
+	 */
+	public void deleteById(Long id) {
 		orderRepository.deleteById(id);
 	}
 
-	public List<Order> findByUserId(String username)
-	{
+	/**
+	 * Retrieves orders by the username of the user who placed them.
+	 *
+	 * @param username the username of the user
+	 * @return a list of orders placed by the specified user
+	 */
+	public List<Order> findByUserId(String username) {
 		return orderRepository.findByUsername(username);
 	}
 }

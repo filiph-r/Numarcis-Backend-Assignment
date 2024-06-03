@@ -11,35 +11,45 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-
+/**
+ * Configuration class for web security.
+ */
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig
-{
+public class WebSecurityConfig {
 
 	private AuthorizationFilter authorizationFilter;
 
+	/**
+	 * Constructs a WebSecurityConfig with the specified AuthorizationFilter.
+	 *
+	 * @param authorizationFilter the authorization filter to use
+	 */
 	@Autowired
-	public WebSecurityConfig(AuthorizationFilter authorizationFilter)
-	{
+	public WebSecurityConfig(AuthorizationFilter authorizationFilter) {
 		this.authorizationFilter = authorizationFilter;
 	}
 
+	/**
+	 * Configures the security filter chain.
+	 *
+	 * @param http the HttpSecurity to modify
+	 * @return the configured SecurityFilterChain
+	 * @throws Exception if an error occurs during configuration
+	 */
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
-	{
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests((authz) -> authz
-						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.GET.name())).permitAll()
-						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.POST.name())).hasRole("ADMIN")
-						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.PUT.name())).hasRole("ADMIN")
-						.requestMatchers(new AntPathRequestMatcher("/products/**", HttpMethod.DELETE.name())).hasRole("ADMIN")
+						.requestMatchers(new AntPathRequestMatcher(SecurityConstants.PRODUCTS_URL, HttpMethod.GET.name())).permitAll()
+						.requestMatchers(new AntPathRequestMatcher(SecurityConstants.PRODUCTS_URL, HttpMethod.POST.name())).hasRole(SecurityConstants.ROLE_ADMIN)
+						.requestMatchers(new AntPathRequestMatcher(SecurityConstants.PRODUCTS_URL, HttpMethod.PUT.name())).hasRole(SecurityConstants.ROLE_ADMIN)
+						.requestMatchers(new AntPathRequestMatcher(SecurityConstants.PRODUCTS_URL, HttpMethod.DELETE.name())).hasRole(SecurityConstants.ROLE_ADMIN)
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 }
-
