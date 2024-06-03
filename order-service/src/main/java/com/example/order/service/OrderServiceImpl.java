@@ -3,6 +3,8 @@ package com.example.order.service;
 import com.example.order.model.Order;
 import com.example.order.model.Product;
 import com.example.order.repository.OrderRepository;
+import com.example.order.security.SecurityConstants;
+import com.example.order.service.interfaces.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,7 @@ import java.util.Optional;
 
 
 @Service
-public class OrderService
+public class OrderServiceImpl implements OrderService
 {
 	@Autowired
 	private OrderRepository orderRepository;
@@ -24,13 +26,13 @@ public class OrderService
 	public Order save(Order order, String authorizationHeader)
 	{
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", authorizationHeader);
+		headers.set(SecurityConstants.JWT_HEADER_STRING, authorizationHeader);
 
 		order.getProductIds().forEach(productId -> {
 			HttpEntity<String> entity = new HttpEntity<>(headers);
 
 			ResponseEntity<Product> response = restTemplate.exchange(
-					"http://PRODUCT-SERVICE/products/" + productId,
+					SecurityConstants.PRODUCT_SERVICE_URL + productId,
 					HttpMethod.GET,
 					entity,
 					Product.class

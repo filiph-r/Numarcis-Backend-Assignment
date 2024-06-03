@@ -4,6 +4,7 @@ import com.example.order.model.Order;
 import com.example.order.model.Product;
 import com.example.order.repository.OrderRepository;
 import com.example.order.security.JwtUtil;
+import com.example.order.security.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,12 +32,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
+/**
+ * Integration tests for the Order Service.
+ */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class OrderServiceIntegrationTest
-{
+public class OrderServiceIntegrationTest {
 
 	private MockMvc mockMvc;
 
@@ -56,32 +58,36 @@ public class OrderServiceIntegrationTest
 
 	private Order order;
 
-
-
+	/**
+	 * Sets up the test environment before each test.
+	 */
 	@BeforeEach
-	public void setUp()
-	{
+	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 		orderRepository.deleteAll();
 		order = new Order();
 		order.setUsername("Tester");
-		order.setProductIds(Collections.singletonList(1l));
+		order.setProductIds(Collections.singletonList(1L));
 		order = orderRepository.save(order);
 	}
 
+	/**
+	 * Tests the creation of an order.
+	 *
+	 * @throws Exception if an error occurs during the test
+	 */
 	@Test
-	public void createOrder() throws Exception
-	{
+	public void createOrder() throws Exception {
 		Order newOrder = new Order();
-		newOrder.setProductIds(Collections.singletonList(1l));
+		newOrder.setProductIds(Collections.singletonList(1L));
 
 		HttpHeaders headers = new HttpHeaders();
-		String headerValue = "Bearer " + jwtUtil.createToken("username", Collections.singletonList("ADMIN"));
-		headers.add("Authorization", headerValue);
+		String headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("username", Collections.singletonList(SecurityConstants.ROLE_ADMIN));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		ResponseEntity<Product> response = new ResponseEntity<>(HttpStatus.OK);
 		when(restTemplate.exchange(
-				"http://PRODUCT-SERVICE/products/" + 1l,
+				SecurityConstants.PRODUCT_SERVICE_URL + 1L,
 				HttpMethod.GET,
 				new HttpEntity<>(headers),
 				Product.class
@@ -97,12 +103,16 @@ public class OrderServiceIntegrationTest
 				.andExpect(jsonPath("$.productIds", is(Arrays.asList(1))));
 	}
 
+	/**
+	 * Tests retrieving an order by its ID.
+	 *
+	 * @throws Exception if an error occurs during the test
+	 */
 	@Test
-	public void getOrderById() throws Exception
-	{
+	public void getOrderById() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		String headerValue = "Bearer " + jwtUtil.createToken("admin", Collections.singletonList("ADMIN"));
-		headers.add("Authorization", headerValue);
+		String headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("admin", Collections.singletonList(SecurityConstants.ROLE_ADMIN));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		mockMvc.perform(get("/orders/{id}", order.getId())
 						.headers(headers))
@@ -112,8 +122,8 @@ public class OrderServiceIntegrationTest
 				.andExpect(jsonPath("$.productIds", is(Arrays.asList(1))));
 
 		headers = new HttpHeaders();
-		headerValue = "Bearer " + jwtUtil.createToken("Tester", Collections.singletonList("USER"));
-		headers.add("Authorization", headerValue);
+		headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("Tester", Collections.singletonList(SecurityConstants.ROLE_USER));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		mockMvc.perform(get("/orders/{id}", order.getId())
 						.headers(headers))
@@ -123,26 +133,30 @@ public class OrderServiceIntegrationTest
 				.andExpect(jsonPath("$.productIds", is(Arrays.asList(1))));
 
 		headers = new HttpHeaders();
-		headerValue = "Bearer " + jwtUtil.createToken("WrongUsername", Collections.singletonList("USER"));
-		headers.add("Authorization", headerValue);
+		headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("WrongUsername", Collections.singletonList(SecurityConstants.ROLE_USER));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		mockMvc.perform(get("/orders/{id}", order.getId())
 						.headers(headers))
 				.andExpect(status().isForbidden());
 	}
 
+	/**
+	 * Tests updating an order.
+	 *
+	 * @throws Exception if an error occurs during the test
+	 */
 	@Test
-	public void updateOrder() throws Exception
-	{
-		order.setProductIds(Collections.singletonList(1l));
+	public void updateOrder() throws Exception {
+		order.setProductIds(Collections.singletonList(1L));
 
 		HttpHeaders headers = new HttpHeaders();
-		String headerValue = "Bearer " + jwtUtil.createToken("admin", Collections.singletonList("ADMIN"));
-		headers.add("Authorization", headerValue);
+		String headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("admin", Collections.singletonList(SecurityConstants.ROLE_ADMIN));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		ResponseEntity<Product> response = new ResponseEntity<>(HttpStatus.OK);
 		when(restTemplate.exchange(
-				"http://PRODUCT-SERVICE/products/" + 1l,
+				SecurityConstants.PRODUCT_SERVICE_URL + 1L,
 				HttpMethod.GET,
 				new HttpEntity<>(headers),
 				Product.class
@@ -158,12 +172,16 @@ public class OrderServiceIntegrationTest
 				.andExpect(jsonPath("$.productIds", is(Arrays.asList(1))));
 	}
 
+	/**
+	 * Tests deleting an order.
+	 *
+	 * @throws Exception if an error occurs during the test
+	 */
 	@Test
-	public void deleteOrder() throws Exception
-	{
+	public void deleteOrder() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		String headerValue = "Bearer " + jwtUtil.createToken("admin", Collections.singletonList("ADMIN"));
-		headers.add("Authorization", headerValue);
+		String headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("admin", Collections.singletonList(SecurityConstants.ROLE_ADMIN));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		mockMvc.perform(delete("/orders/{id}", order.getId())
 						.headers(headers))
@@ -173,12 +191,16 @@ public class OrderServiceIntegrationTest
 		assertTrue(deletedOrder.isEmpty());
 	}
 
+	/**
+	 * Tests retrieving orders by user ID.
+	 *
+	 * @throws Exception if an error occurs during the test
+	 */
 	@Test
-	public void getOrdersByUserId() throws Exception
-	{
+	public void getOrdersByUserId() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		String headerValue = "Bearer " + jwtUtil.createToken("admin", Collections.singletonList("ADMIN"));
-		headers.add("Authorization", headerValue);
+		String headerValue = SecurityConstants.JWT_TOKEN_PREFIX + jwtUtil.createToken("admin", Collections.singletonList(SecurityConstants.ROLE_ADMIN));
+		headers.add(SecurityConstants.JWT_HEADER_STRING, headerValue);
 
 		mockMvc.perform(get("/orders/user/{userId}", order.getUsername())
 						.headers(headers))
