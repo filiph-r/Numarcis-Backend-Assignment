@@ -16,7 +16,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-
+/**
+ * Configuration class for web security.
+ * <p>
+ * This class configures security settings for the application, including authentication, authorization,
+ * and password encoding.
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -24,12 +30,30 @@ public class WebSecurityConfig {
 	private final CustomUserDetailsService customUserDetailsService;
 	private final JwtUtil jwtUtil;
 
+	/**
+	 * Constructs a new WebSecurityConfig.
+	 *
+	 * @param customUserDetailsService the custom user details service
+	 * @param jwtUtil the JWT utility
+	 */
 	@Autowired
 	public WebSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil) {
 		this.customUserDetailsService = customUserDetailsService;
 		this.jwtUtil = jwtUtil;
 	}
 
+	/**
+	 * Configures the security filter chain.
+	 * <p>
+	 * This method sets up the HTTP security, including disabling CSRF, setting session management to stateless,
+	 * configuring authorization rules, and adding the custom authentication filter.
+	 * </p>
+	 *
+	 * @param http the HttpSecurity object
+	 * @param authenticationManager the authentication manager
+	 * @return the configured SecurityFilterChain
+	 * @throws Exception if an error occurs during configuration
+	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
 		final AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager, jwtUtil);
@@ -38,8 +62,8 @@ public class WebSecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authz -> authz
 						.requestMatchers(
-								new AntPathRequestMatcher("/users/register"),
-								new AntPathRequestMatcher("/users/login")
+								new AntPathRequestMatcher(SecurityConstants.USERS_REGISTER_URL),
+								new AntPathRequestMatcher(SecurityConstants.USERS_LOGIN_URL)
 						).permitAll()
 						.anyRequest().authenticated()
 				)
@@ -48,16 +72,33 @@ public class WebSecurityConfig {
 		return http.build();
 	}
 
+	/**
+	 * Configures the authentication manager.
+	 *
+	 * @param authenticationConfiguration the authentication configuration
+	 * @return the configured AuthenticationManager
+	 * @throws Exception if an error occurs during configuration
+	 */
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
+	/**
+	 * Configures the password encoder.
+	 *
+	 * @return the PasswordEncoder
+	 */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+	/**
+	 * Configures the DAO authentication provider.
+	 *
+	 * @return the DaoAuthenticationProvider
+	 */
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

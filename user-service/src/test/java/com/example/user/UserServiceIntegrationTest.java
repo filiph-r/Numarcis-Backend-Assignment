@@ -2,6 +2,7 @@ package com.example.user;
 
 import com.example.user.model.User;
 import com.example.user.security.AuthenticationRequest;
+import com.example.user.security.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class UserServiceIntegrationTest {
 		user.setUsername("testuser1");
 		user.setPassword("password");
 
-		mockMvc.perform(post("/users/register")
+		mockMvc.perform(post(SecurityConstants.USERS_REGISTER_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(user)))
 				.andExpect(status().isCreated());
@@ -71,7 +72,7 @@ public class UserServiceIntegrationTest {
 		user.setUsername("");
 		user.setPassword("password");
 
-		mockMvc.perform(post("/users/register")
+		mockMvc.perform(post(SecurityConstants.USERS_REGISTER_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(user)))
 				.andExpect(status().isBadRequest());
@@ -89,7 +90,7 @@ public class UserServiceIntegrationTest {
 		user.setUsername("testuser");
 		user.setPassword(""); // Invalid password
 
-		mockMvc.perform(post("/users/register")
+		mockMvc.perform(post(SecurityConstants.USERS_REGISTER_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(user)))
 				.andExpect(status().isBadRequest());
@@ -107,7 +108,7 @@ public class UserServiceIntegrationTest {
 		user.setUsername("testuser2");
 		user.setPassword("password");
 
-		mockMvc.perform(post("/users/register")
+		mockMvc.perform(post(SecurityConstants.USERS_REGISTER_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(user)))
 				.andExpect(status().isCreated());
@@ -116,7 +117,7 @@ public class UserServiceIntegrationTest {
 		authenticationRequest.setUsername("testuser2");
 		authenticationRequest.setPassword("password");
 
-		mockMvc.perform(post("/users/login")
+		mockMvc.perform(post(SecurityConstants.USERS_LOGIN_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(authenticationRequest)))
 				.andExpect(status().isOk());
@@ -134,7 +135,7 @@ public class UserServiceIntegrationTest {
 		authenticationRequest.setUsername("nonexistentuser");
 		authenticationRequest.setPassword("wrongpassword");
 
-		mockMvc.perform(post("/users/login")
+		mockMvc.perform(post(SecurityConstants.USERS_LOGIN_URL)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(asJsonString(authenticationRequest)))
 				.andExpect(status().isUnauthorized());

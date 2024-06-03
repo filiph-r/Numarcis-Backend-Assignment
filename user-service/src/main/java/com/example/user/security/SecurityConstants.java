@@ -1,9 +1,10 @@
-package com.example.product.security;
+package com.example.user.security;
 
 /**
  * Constants used for security configuration.
  */
-public final class SecurityConstants {
+public final class SecurityConstants
+{
 
 	// JWT related constants
 	/**
@@ -29,13 +30,15 @@ public final class SecurityConstants {
 
 	// URL patterns
 	/**
-	 * URL pattern for products.
+	 * URL pattern for user-service.
 	 */
-	public static final String PRODUCTS_URL = "/products/**";
+	public static final String USERS_REGISTER_URL = "/users/register";
+	public static final String USERS_LOGIN_URL = "/users/login";
 
 	/**
 	 * Private constructor to prevent instantiation.
 	 */
-	private SecurityConstants() {
+	private SecurityConstants()
+	{
 	}
 }
