@@ -30,6 +30,11 @@ public class UserController
 		{
 			return new ResponseEntity<>(HttpStatus.CONFLICT);
 		}
+		if (user.getUsername() == null || user.getUsername().isEmpty() || user.getPassword() == null || user.getPassword().isEmpty())
+		{
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+
 		user.setRoles(Arrays.asList("USER"));
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		customUserDetailsService.save(user);
