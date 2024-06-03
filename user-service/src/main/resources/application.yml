@@ -21,3 +21,7 @@ eureka:
 jwt:
   secret: secret
   expiration: 3600000 # 1 hour in milliseconds
+
+admin:
+  username: admin
+  password: nimda

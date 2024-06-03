@@ -13,7 +13,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 		http
-				.csrf(csrf -> csrf.disable())  // Disable CSRF protection
+				.csrf(csrf -> csrf.disable())
 				.authorizeExchange(authorize -> authorize
 						.anyExchange().permitAll()  // Allow all requests
 				);

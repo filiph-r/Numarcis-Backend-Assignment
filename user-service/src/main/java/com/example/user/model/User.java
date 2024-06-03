@@ -2,6 +2,9 @@ package com.example.user.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "\"user\"")
@@ -12,7 +15,8 @@ public class User
 	private Long id;
 	private String username;
 	private String password;
-	private String role;
+	@ElementCollection(fetch = FetchType.EAGER)
+	private List<String> roles = new ArrayList<>();
 
 	public Long getId()
 	{
@@ -44,14 +48,14 @@ public class User
 		this.password = password;
 	}
 
-	public String getRole()
+	public List<String> getRoles()
 	{
-		return role;
+		return roles;
 	}
 
-	public void setRole(String role)
+	public void setRoles(List<String> roles)
 	{
-		this.role = role;
+		this.roles = roles;
 	}
 }
 

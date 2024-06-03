@@ -1,4 +1,4 @@
-package com.example.user.security;
+package com.example.order.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -13,7 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-public class JwtTokenProvider {
+public class JwtUtil
+{
 
 	@Value("${jwt.secret}")
 	private String secretKey;
@@ -24,7 +25,7 @@ public class JwtTokenProvider {
 	private Algorithm algorithm;
 	private JWTVerifier verifier;
 
-	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+	public JwtUtil(@Value("${jwt.secret}") String secretKey) {
 		this.secretKey = secretKey;
 		this.algorithm = Algorithm.HMAC256(secretKey);
 		this.verifier = JWT.require(algorithm).build();

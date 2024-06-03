@@ -16,12 +16,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig
 {
 
-	private JwtTokenProvider jwtTokenProvider;
+	private AuthorizationFilter authorizationFilter;
 
 	@Autowired
-	public WebSecurityConfig(JwtTokenProvider jwtTokenProvider)
+	public WebSecurityConfig(AuthorizationFilter authorizationFilter)
 	{
-		this.jwtTokenProvider = jwtTokenProvider;
+		this.authorizationFilter = authorizationFilter;
 	}
 
 	@Bean
@@ -36,9 +36,8 @@ public class WebSecurityConfig
 						.requestMatchers(HttpMethod.PUT, "/orders/**").authenticated()
 						.requestMatchers(HttpMethod.DELETE, "/orders/**").authenticated()
 						.anyRequest().authenticated()
-						.and()
-						.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-				);
+				)
+				.addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

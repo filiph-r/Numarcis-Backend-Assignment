@@ -30,7 +30,7 @@ public class ProductController
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Product> getProductById(@PathVariable Long id)
+	public ResponseEntity<Product> getProductById(@PathVariable("id") Long id)
 	{
 		return productService.findById(id)
 				.map(ResponseEntity::ok)
@@ -38,21 +38,21 @@ public class ProductController
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product)
+	public ResponseEntity<Product> updateProduct(@PathVariable("id") Long id, @RequestBody Product product)
 	{
 		product.setId(id);
 		return ResponseEntity.ok(productService.save(product));
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteProduct(@PathVariable Long id)
+	public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id)
 	{
 		productService.deleteById(id);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<List<Product>> searchProducts(@RequestParam String query)
+	public ResponseEntity<List<Product>> searchProducts(@RequestParam("query") String query)
 	{
 		return ResponseEntity.ok(productService.search(query));
 	}

@@ -1,26 +1,30 @@
-package com.example.user.security;
+package com.example.product.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-public class JwtTokenFilter extends OncePerRequestFilter
+@Component
+public class AuthorizationFilter extends OncePerRequestFilter
 {
-	private JwtTokenProvider jwtTokenProvider;
+	private JwtUtil jwtUtil;
 
-	public JwtTokenFilter(JwtTokenProvider jwtTokenProvider)
+	@Autowired
+	public AuthorizationFilter(JwtUtil jwtUtil)
 	{
-		this.jwtTokenProvider = jwtTokenProvider;
+		this.jwtUtil = jwtUtil;
 	}
 
 	@Override
@@ -29,14 +33,20 @@ public class JwtTokenFilter extends OncePerRequestFilter
 	{
 		String token = resolveToken(request);
 
-		if (token != null && jwtTokenProvider.validateToken(token))
+		if (token == null || !jwtUtil.validateToken(token))
 		{
-			String username = jwtTokenProvider.getUsername(token);
-			List<String> roles = jwtTokenProvider.getRoles(token);
-			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null,
-					roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
-			SecurityContextHolder.getContext().setAuthentication(auth);
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+			return;
 		}
+
+		String username = jwtUtil.getUsername(token);
+		List<String> roles = jwtUtil.getRoles(token);
+		List<GrantedAuthority> authorities = roles.stream()
+				.map(role -> new SimpleGrantedAuthority("ROLE_" + role))  // Prefix roles with "ROLE_"
+				.collect(Collectors.toList());
+		UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null,
+				authorities);
+		SecurityContextHolder.getContext().setAuthentication(auth);
 
 		filterChain.doFilter(request, response);
 	}
@@ -51,4 +61,3 @@ public class JwtTokenFilter extends OncePerRequestFilter
 		return null;
 	}
 }
-

@@ -13,7 +13,7 @@ public class Order
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Long userId;
+	private String username;
 	@ElementCollection
 	private List<Long> productIds;
 
@@ -27,14 +27,14 @@ public class Order
 		this.id = id;
 	}
 
-	public Long getUserId()
+	public String getUsername()
 	{
-		return userId;
+		return username;
 	}
 
-	public void setUserId(Long userId)
+	public void setUsername(String username)
 	{
-		this.userId = userId;
+		this.username = username;
 	}
 
 	public List<Long> getProductIds()
