@@ -75,7 +75,7 @@ public class AuthorizationFilter extends OncePerRequestFilter
 		if (uri.startsWith("/orders/user/"))
 		{
 			String userIdStr = uri.split("/orders/user/")[1];
-			return userIdStr.equals(username) || roles.contains("ROLE_ADMIN");
+			return userIdStr.equals(username) || roles.contains("ADMIN");
 		}
 
 		if (uri.startsWith("/orders/"))
@@ -89,7 +89,7 @@ public class AuthorizationFilter extends OncePerRequestFilter
 				return false;
 			}
 
-			return order.getUsername().equals(username) || roles.contains("ROLE_ADMIN");
+			return order.getUsername().equals(username) || roles.contains("ADMIN");
 		}
 
 		return true;
