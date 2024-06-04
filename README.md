@@ -25,6 +25,8 @@ The repository also includes integration tests.
 - [Security](#security)
 - [Inter-Service Communication](#inter-service-communication)
 - [Database](#database)
+- [Executables](#executables)
+- [Improvements](#improvements)
 
 ## Project Structure
 
