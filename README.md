@@ -123,4 +123,11 @@ The project is organized as a monorepo containing five Spring Boot microservices
 - The **start_services.sh** bash script has been created to start all services gracefully
 - make sure to run *chmod +x start_services.sh* before running the script
 
+## Improvements
+
+- More detailed integration tests
+- Unit Tests
+- Resilience
+- Detailed validations
+- Error Handling
 
