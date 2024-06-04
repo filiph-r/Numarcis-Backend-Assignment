@@ -36,6 +36,9 @@ The project is organized as a monorepo containing five Spring Boot microservices
 - `api-gateway`: Handles routing.
 - `eureka-server`: Handles service registration and discovery.
 
+![Untitled Diagram drawio](https://github.com/filiph-r/Numarcis-Backend-Assignment/assets/48492507/8214e767-6756-4af4-8789-60a3ae82ccef)
+
+
 ## Endpoints and Functionality
 
 ### User Service
@@ -97,11 +100,11 @@ The project is organized as a monorepo containing five Spring Boot microservices
   - Order Service: Only the order creator or an ADMIN can view or modify an order.
  
 - **Note**:
-  - The UserService returns a valid JWT after successfull *authentication*
+  - The UserService returns a valid JWT after successful *Authentication*
   - That JWT should be used for all further communication placed in the Header
-  - The JWT is checked by other services therfore they have *authorization* implemented
+  - The JWT is checked by other services therefore they have *Authorization* implemented
       - Downside to this -> All services need to be configured with the same JWT secret
-      - Positive side to this -> Other services don't need to communicate with UserService for each authorization check and the JWT hold all the necessary information like username and role
+      - Positive side to this -> Other services don't need to communicate with UserService for each authorization check and the JWT holds all the necessary information like username and role
 
 ## Inter-Service Communication
 
